@@ -4,8 +4,20 @@
   <meta charset="UTF-8" />
   <title>Watch Party</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- React и ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <!-- Babel для JSX -->
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+  <!-- React Player -->
+  <script src="https://unpkg.com/react-player/dist/ReactPlayer.js"></script>
+
   <style>
     body {
+      margin: 0;
       background: #0f0f0f;
       color: white;
       font-family: Arial, sans-serif;
@@ -13,14 +25,71 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
-      margin: 0;
     }
-    h1 {
-      font-size: 32px;
+    .box {
+      text-align: center;
+    }
+    input {
+      padding: 10px;
+      width: 250px;
+      border-radius: 8px;
+      border: none;
+      margin-right: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #ff0055;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .player {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>Watch Party работает 🚀</h1>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    function App() {
+      const [url, setUrl] = useState("");
+      const [playUrl, setPlayUrl] = useState("");
+
+      return (
+        <div className="box">
+          <h1>Watch Party</h1>
+
+          <div>
+            <input
+              placeholder="Вставь ссылку на видео"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+            />
+            <button onClick={() => setPlayUrl(url)}>
+              Смотреть
+            </button>
+          </div>
+
+          {playUrl && (
+            <div className="player">
+              <ReactPlayer
+                url={playUrl}
+                controls
+                playing
+                width="640px"
+                height="360px"
+              />
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
 </body>
 </html>
