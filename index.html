@@ -22,20 +22,21 @@
             min-height: 100vh;
         }
         header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
-        .logo { font-size: 32px; font-weight: 900; }
+        .logo { font-size: 32px; font-weight: 900; letter-spacing: -1px; }
         .search-container { padding: 0 15px 15px; }
         .search-bar { background: rgba(255, 255, 255, 0.12); border-radius: 15px; display: flex; align-items: center; padding: 12px 18px; }
-        .search-bar input { background: none; border: none; color: white; margin-left: 12px; width: 100%; outline: none; }
+        .search-bar input { background: none; border: none; color: white; margin-left: 12px; width: 100%; outline: none; font-size: 16px; }
         .section-title { display: flex; align-items: center; padding: 10px 20px 15px; font-size: 24px; font-weight: 600; }
+        .section-title i { margin-right: 12px; }
         .content-list { display: flex; flex-direction: column; gap: 12px; padding: 0 12px; }
-        .card { background: var(--card-bg); border-radius: 24px; display: flex; overflow: hidden; height: 110px; }
+        .card { background: var(--card-bg); border-radius: 24px; display: flex; overflow: hidden; height: 110px; border: 1px solid rgba(255,255,255,0.05); }
         .thumbnail-container { position: relative; width: 160px; min-width: 160px; background: #1a1a1a; }
         .thumbnail-container img { width: 100%; height: 100%; object-fit: cover; }
         .platform-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.4); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.3); }
         .card-info { padding: 12px 15px; display: flex; flex-direction: column; justify-content: space-between; flex: 1; }
-        .card-title { font-size: 15px; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .avatar-count { font-size: 13px; color: var(--secondary-text); }
-        .fab { position: fixed; bottom: 30px; right: 25px; background: white; color: black; width: 68px; height: 68px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 35px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+        .card-title { font-size: 14px; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
+        .avatar-count { font-size: 13px; color: var(--secondary-text); font-weight: 400; }
+        .fab { position: fixed; bottom: 30px; right: 25px; background: white; color: black; width: 68px; height: 68px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 35px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer; }
     </style>
 </head>
 <body>
@@ -54,4 +55,82 @@
     </div>
 
     <div class="section-title">
-        <i class="fas fa-globe
+        <i class="fas fa-globe"></i> Публичные
+    </div>
+
+    <main class="content-list" id="rooms-container">
+        </main>
+
+    <div class="fab" onclick="createRoom()"><i class="fas fa-plus"></i></div>
+
+    <script>
+        // Твои данные подключения
+        const SUPABASE_URL = 'https://otkessnonmdttowgkfrg.supabase.co';
+        const SUPABASE_KEY = 'Sb_publishable_J3AE0I_VFL0dvf3ffO7vbg_bwHJSWux';
+
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Функция загрузки комнат
+        async function loadRooms() {
+            const { data: rooms, error } = await _supabase
+                .from('rooms')
+                .select('*')
+                .gt('participants_count', 0) // Только те, где есть люди
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Ошибка:', error);
+                return;
+            }
+
+            const container = document.getElementById('rooms-container');
+            container.innerHTML = ''; 
+
+            if (rooms.length === 0) {
+                container.innerHTML = '<div style="text-align:center; opacity:0.5; margin-top:20px;">Пока нет активных комнат</div>';
+            }
+
+            rooms.forEach(room => {
+                container.innerHTML += `
+                    <div class="card">
+                        <div class="thumbnail-container">
+                            <img src="${room.thumbnail_url || 'https://via.placeholder.com/160x100/222/fff?text=Rave'}" alt="thumb">
+                            <div class="platform-overlay"><i class="fab fa-youtube"></i></div>
+                        </div>
+                        <div class="card-info">
+                            <div class="card-title">${room.title}</div>
+                            <div class="avatar-count">${room.participants_count} участников</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Функция для теста (создает комнату при нажатии на +)
+        async function createRoom() {
+            const title = prompt("Введите название комнаты:");
+            if (!title) return;
+
+            await _supabase.from('rooms').insert([
+                { 
+                    title: title, 
+                    participants_count: 1, 
+                    thumbnail_url: 'https://picsum.photos/200/120' 
+                }
+            ]);
+        }
+
+        // Запуск при загрузке страницы
+        loadRooms();
+
+        // Подписка на обновления в реальном времени
+        _supabase
+            .channel('room-updates')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms' }, () => {
+                loadRooms();
+            })
+            .subscribe();
+    </script>
+</body>
+</html>
+
