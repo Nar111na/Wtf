@@ -9,34 +9,127 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* Общие настройки, чтобы ничего не пропадало */
-        * { box-sizing: border-box; }
-        
         body, html {
             margin: 0; padding: 0;
-            width: 100%; min-height: 100%;
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            width: 100%; height: 100%;
+            background-color: #0d0a1a;
             color: white;
-            background-color: #0d0a1a; /* Запасной фон, если анимация не грузится */
+            font-family: sans-serif;
+            overflow-x: hidden;
         }
 
         /* АНИМИРОВАННЫЙ ФОН */
-        .background-container {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
-            overflow: hidden;
-            background: #0f0c29;
+        .bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; overflow: hidden; background: #0b0914;
         }
-
         .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.6;
-            animation: move 15s infinite alternate ease-in-out;
+            position: absolute; border-radius: 50%; filter: blur(70px);
+            opacity: 0.5; animation: move 20s infinite alternate;
+        }
+        .b1 { width: 400px; height: 400px; background: #51158d; top: -10%; left: -10%; }
+        .b2 { width: 500px; height: 500px; background: #1a398a; bottom: -10%; right: -10%; animation-delay: -5s; }
+        
+        @keyframes move {
+            from { transform: translate(0, 0); }
+            to { transform: translate(60px, 40px); }
         }
 
-        .blob-1 { width: 400px; height: 400px; background: #6a11cb; top: -10%; left: -10%; }
-        .blob-2 { width: 500px; height: 500px; background: #2575fc; bottom: -10%; right: -10
+        /* ИНТЕРФЕЙС */
+        .ui { position: relative; z-index: 5; display: flex; flex-direction: column; height: 100vh; }
+        
+        header { display: flex; justify-content: space-between; padding: 20px; align-items: center; }
+        .logo { font-size: 28px; font-weight: 900; }
+
+        .search-box { padding: 0 15px 15px; }
+        .search-bar { 
+            background: rgba(255,255,255,0.1); border-radius: 12px; 
+            padding: 12px; display: flex; align-items: center;
+        }
+        .search-bar input { background: none; border: none; color: white; margin-left: 10px; width: 100%; outline: none; }
+
+        .title-sec { padding: 10px 20px; font-size: 20px; display: flex; align-items: center; font-weight: bold; }
+        .title-sec i { margin-right: 10px; }
+
+        #list { padding: 10px; overflow-y: auto; flex-grow: 1; }
+
+        /* КАРТОЧКА */
+        .card { 
+            background: rgba(255,255,255,0.07); border-radius: 20px; 
+            display: flex; height: 100px; margin-bottom: 12px; overflow: hidden;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+        }
+        .img { width: 140px; background: #000; position: relative; }
+        .img img { width: 100%; height: 100%; object-fit: cover; }
+        .txt { padding: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+        .t-main { font-size: 14px; font-weight: 500; }
+        .t-sub { font-size: 12px; color: #aaa; }
+
+        .fab { 
+            position: fixed; bottom: 30px; right: 25px; 
+            background: white; color: black; width: 60px; height: 60px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 100;
+        }
+
+        #error-log {
+            position: fixed; top: 0; left: 0; width: 100%; background: red; color: white;
+            font-size: 12px; z-index: 1000; display: none; padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="error-log"></div>
+
+    <div class="bg">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+    </div>
+
+    <div class="ui">
+        <header>
+            <i class="fas fa-cog"></i>
+            <div class="logo">rave</div>
+            <i class="fas fa-user-friends"></i>
+        </header>
+
+        <div class="search-box">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Поиск">
+            </div>
+        </div>
+
+        <div class="title-sec">
+            <i class="fas fa-globe"></i> Публичные
+        </div>
+
+        <div id="list">
+            </div>
+    </div>
+
+    <div class="fab" onclick="createRoom()">
+        <i class="fas fa-plus"></i>
+    </div>
+
+    <script>
+        const LOG = document.getElementById('error-log');
+        function showError(msg) { LOG.style.display = 'block'; LOG.innerText = "Ошибка: " + msg; }
+
+        const S_URL = 'https://otkessnonmdttowgkfrg.supabase.co';
+        const S_KEY = 'Sb_publishable_J3AE0I_VFL0dvf3ffO7vbg_bwHJSWux';
+
+        let _supabase;
+        try {
+            _supabase = supabase.createClient(S_URL, S_KEY);
+        } catch (e) {
+            showError("Не удалось инициализировать Supabase: " + e.message);
+        }
+
+        async function updateUI() {
+            try {
+                const { data, error } = await _supabase
+                    .from('rooms')
+                    .select('*')
+                    .gt('participants_count',
