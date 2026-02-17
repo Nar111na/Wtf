@@ -1,135 +1,63 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rave Clone</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Rave Clone</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <style>
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            background-color: #0d0a1a;
-            color: white;
-            font-family: sans-serif;
-            overflow-x: hidden;
-        }
+  <style>
+    /* ─── ОБНУЛЕНИЕ И ШРИФТЫ ───────────────────────────────────── */
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
 
-        /* АНИМИРОВАННЫЙ ФОН */
-        .bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1; overflow: hidden; background: #0b0914;
-        }
-        .blob {
-            position: absolute; border-radius: 50%; filter: blur(70px);
-            opacity: 0.5; animation: move 20s infinite alternate;
-        }
-        .b1 { width: 400px; height: 400px; background: #51158d; top: -10%; left: -10%; }
-        .b2 { width: 500px; height: 500px; background: #1a398a; bottom: -10%; right: -10%; animation-delay: -5s; }
-        
-        @keyframes move {
-            from { transform: translate(0, 0); }
-            to { transform: translate(60px, 40px); }
-        }
+    body {
+      width: 100%; min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: white; background: #07030f;
+      overflow-x: hidden;
+    }
 
-        /* ИНТЕРФЕЙС */
-        .ui { position: relative; z-index: 5; display: flex; flex-direction: column; height: 100vh; }
-        
-        header { display: flex; justify-content: space-between; padding: 20px; align-items: center; }
-        .logo { font-size: 28px; font-weight: 900; }
+    /* ─── CLAUDE MESH GRADIENT BACKROUND ──────────────────────── */
+    .rave-bg {
+      position: fixed; top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: -1; overflow: hidden; background: #07030f;
+      isolation: isolate;
+    }
 
-        .search-box { padding: 0 15px 15px; }
-        .search-bar { 
-            background: rgba(255,255,255,0.1); border-radius: 12px; 
-            padding: 12px; display: flex; align-items: center;
-        }
-        .search-bar input { background: none; border: none; color: white; margin-left: 10px; width: 100%; outline: none; }
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(90px);
+      mix-blend-mode: screen; will-change: transform; opacity: 0.72;
+    }
 
-        .title-sec { padding: 10px 20px; font-size: 20px; display: flex; align-items: center; font-weight: bold; }
-        .title-sec i { margin-right: 10px; }
+    .blob-1 { width: 65vmax; height: 65vmax; top: -15%; left: -10%; background: radial-gradient(circle at 40% 40%, #5b2d8e 0%, #2d1160 55%, transparent 80%); animation: drift-1 22s ease-in-out infinite alternate; }
+    .blob-2 { width: 55vmax; height: 55vmax; bottom: -20%; right: -10%; background: radial-gradient(circle at 55% 55%, #1a4fd6 0%, #0d2a8a 50%, transparent 80%); animation: drift-2 28s ease-in-out infinite alternate; }
+    .blob-3 { width: 45vmax; height: 45vmax; top: 30%; left: 30%; background: radial-gradient(circle at 50% 45%, #e0298e 0%, #8a1060 55%, transparent 80%); animation: drift-3 19s ease-in-out infinite alternate; }
+    .blob-4 { width: 38vmax; height: 38vmax; bottom: 5%; left: -5%; background: radial-gradient(circle at 50% 50%, #7c3ac9 0%, #3a1580 55%, transparent 80%); animation: drift-4 25s ease-in-out infinite alternate; }
 
-        #list { padding: 10px; overflow-y: auto; flex-grow: 1; }
+    @keyframes drift-1 { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(18vw, 8vh) scale(1.02); } }
+    @keyframes drift-2 { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(-15vw, 3vh) scale(1.05); } }
+    @keyframes drift-3 { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(10vw, -2vh) scale(0.96); } }
+    @keyframes drift-4 { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(16vw, -12vh) scale(1.05); } }
 
-        /* КАРТОЧКА */
-        .card { 
-            background: rgba(255,255,255,0.07); border-radius: 20px; 
-            display: flex; height: 100px; margin-bottom: 12px; overflow: hidden;
-            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
-        }
-        .img { width: 140px; background: #000; position: relative; }
-        .img img { width: 100%; height: 100%; object-fit: cover; }
-        .txt { padding: 12px; display: flex; flex-direction: column; justify-content: space-between; }
-        .t-main { font-size: 14px; font-weight: 500; }
-        .t-sub { font-size: 12px; color: #aaa; }
+    .rave-bg::before {
+      content: ""; position: absolute; inset: 0; z-index: 1; opacity: 0.045; mix-blend-mode: overlay; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    }
 
-        .fab { 
-            position: fixed; bottom: 30px; right: 25px; 
-            background: white; color: black; width: 60px; height: 60px; 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 100;
-        }
+    /* ─── ИНТЕРФЕЙС ПОВЕРХ ФОНА ────────────────────────────────── */
+    .wrapper { position: relative; z-index: 10; width: 100%; }
 
-        #error-log {
-            position: fixed; top: 0; left: 0; width: 100%; background: red; color: white;
-            font-size: 12px; z-index: 1000; display: none; padding: 5px;
-        }
-    </style>
-</head>
-<body>
+    header { display: flex; justify-content: space-between; align-items: center; padding: 20px; }
+    .logo { font-size: 32px; font-weight: 900; letter-spacing: -1.5px; }
 
-    <div id="error-log"></div>
-
-    <div class="bg">
-        <div class="blob b1"></div>
-        <div class="blob b2"></div>
-    </div>
-
-    <div class="ui">
-        <header>
-            <i class="fas fa-cog"></i>
-            <div class="logo">rave</div>
-            <i class="fas fa-user-friends"></i>
-        </header>
-
-        <div class="search-box">
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Поиск">
-            </div>
-        </div>
-
-        <div class="title-sec">
-            <i class="fas fa-globe"></i> Публичные
-        </div>
-
-        <div id="list">
-            </div>
-    </div>
-
-    <div class="fab" onclick="createRoom()">
-        <i class="fas fa-plus"></i>
-    </div>
-
-    <script>
-        const LOG = document.getElementById('error-log');
-        function showError(msg) { LOG.style.display = 'block'; LOG.innerText = "Ошибка: " + msg; }
-
-        const S_URL = 'https://otkessnonmdttowgkfrg.supabase.co';
-        const S_KEY = 'Sb_publishable_J3AE0I_VFL0dvf3ffO7vbg_bwHJSWux';
-
-        let _supabase;
-        try {
-            _supabase = supabase.createClient(S_URL, S_KEY);
-        } catch (e) {
-            showError("Не удалось инициализировать Supabase: " + e.message);
-        }
-
-        async function updateUI() {
-            try {
-                const { data, error } = await _supabase
-                    .from('rooms')
-                    .select('*')
-                    .gt('participants_count',
+    .search-box { padding: 0 15px 15px; }
+    .search-bar {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(15px); border-radius: 16px;
+      padding: 12px 18px; display: flex; align-items: center;
+      border: 1px solid rgba(255,255,255,0.
