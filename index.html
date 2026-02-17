@@ -2,25 +2,27 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Rave Clone</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg-gradient: linear-gradient(180deg, #2a1b3d 0%, #0f0c29 100%);
-            --card-bg: rgba(255, 255, 255, 0.1);
+            /* Более глубокий фиолетовый градиент как в оригинале */
+            --bg-gradient: linear-gradient(180deg, #311b52 0%, #0d0a1a 100%);
+            --card-bg: rgba(255, 255, 255, 0.08);
             --text-color: #ffffff;
-            --secondary-text: #b3b3b3;
+            --secondary-text: #a0a0a0;
         }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg-gradient);
             background-attachment: fixed;
             color: var(--text-color);
-            padding-bottom: 80px; /* место для FAB */
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* Шапка */
@@ -28,72 +30,88 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            padding: 15px 20px;
+        }
+
+        header i {
+            font-size: 20px;
+            opacity: 0.8;
         }
 
         .logo {
-            font-size: 28px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-transform: lowercase;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -1px;
         }
 
         /* Поиск */
         .search-container {
-            padding: 0 15px 20px;
+            padding: 0 15px 15px;
         }
 
         .search-bar {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 15px;
             display: flex;
             align-items: center;
-            padding: 10px 20px;
+            padding: 12px 18px;
+        }
+
+        .search-bar i {
+            color: var(--secondary-text);
+            font-size: 18px;
         }
 
         .search-bar input {
             background: none;
             border: none;
             color: white;
-            margin-left: 10px;
+            margin-left: 12px;
             width: 100%;
             font-size: 16px;
         }
 
+        .search-bar input::placeholder { color: var(--secondary-text); }
         .search-bar input:focus { outline: none; }
 
         /* Заголовок секции */
         .section-title {
             display: flex;
             align-items: center;
-            padding: 0 20px 15px;
-            font-size: 22px;
-            font-weight: 500;
+            padding: 10px 20px 15px;
+            font-size: 24px;
+            font-weight: 600;
         }
 
-        .section-title i { margin-right: 15px; }
+        .section-title i { 
+            margin-right: 12px; 
+            font-size: 22px;
+        }
 
         /* Список карточек */
         .content-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            padding: 0 15px;
+            padding: 0 12px;
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: 20px;
+            border-radius: 24px;
             display: flex;
             overflow: hidden;
-            height: 100px;
-            backdrop-filter: blur(5px);
+            height: 110px;
+            text-decoration: none;
+            color: inherit;
         }
 
+        /* Контейнер превью */
         .thumbnail-container {
             position: relative;
             width: 160px;
             min-width: 160px;
+            background: #1a1a1a;
         }
 
         .thumbnail-container img {
@@ -102,25 +120,39 @@
             object-fit: cover;
         }
 
-        .platform-icon {
+        /* Маленькая иконка платформы в углу или по центру */
+        .platform-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 24px;
-            color: rgba(255,255,255,0.8);
+            background: rgba(0,0,0,0.4);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
+        .platform-overlay i {
+            font-size: 18px;
+            color: white;
+        }
+
+        /* Инфо часть */
         .card-info {
-            padding: 10px 15px;
+            padding: 12px 15px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            flex-grow: 1;
+            flex: 1;
         }
 
         .card-title {
-            font-size: 14px;
+            font-size: 15px;
+            line-height: 1.3;
             font-weight: 500;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -130,33 +162,36 @@
 
         .avatars {
             display: flex;
-            gap: 5px;
+            gap: 4px;
+            align-items: center;
         }
 
         .avatar {
-            width: 25px;
-            height: 25px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            background: #444;
-            border: 1px solid #fff;
+            border: 1.5px solid #fff;
+            object-fit: cover;
+            background: #333;
         }
 
-        /* Floating Action Button */
+        /* Плюс (FAB) */
         .fab {
             position: fixed;
             bottom: 30px;
             right: 25px;
             background: white;
             color: black;
-            width: 65px;
-            height: 65px;
+            width: 68px;
+            height: 68px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-size: 35px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
             cursor: pointer;
+            z-index: 100;
         }
 
     </style>
@@ -180,43 +215,44 @@
         <i class="fas fa-globe"></i> Публичные
     </div>
 
-    <main class="content-list" id="content-list">
+    <main class="content-list">
         <div class="card">
             <div class="thumbnail-container">
-                <img src="https://via.placeholder.com/160x100/222" alt="thumb">
-                <i class="fab fa-youtube platform-icon"></i>
+                <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg" alt="thumb">
+                <div class="platform-overlay">
+                    <i class="fab fa-youtube"></i>
+                </div>
             </div>
             <div class="card-info">
                 <div class="card-title">Гио Пика, MIRAVI - Мир (Official Video, 2024)</div>
                 <div class="avatars">
-                    <div class="avatar"></div>
-                    <div class="avatar"></div>
+                    <img src="https://i.pravatar.cc/100?u=1" class="avatar">
+                    <img src="https://i.pravatar.cc/100?u=2" class="avatar">
+                    <img src="https://i.pravatar.cc/100?u=3" class="avatar">
                 </div>
             </div>
         </div>
 
         <div class="card">
             <div class="thumbnail-container">
-                <img src="https://via.placeholder.com/160x100/333" alt="thumb">
-                <i class="fas fa-play-circle platform-icon"></i>
+                <img src="https://img.youtube.com/vi/3JZ_D3ELwOQ/mqdefault.jpg" alt="thumb">
+                <div class="platform-overlay">
+                    <i class="fas fa-play"></i>
+                </div>
             </div>
             <div class="card-info">
                 <div class="card-title">Извне, Все сезоны 1-3, Все серии 1-31 / From...</div>
                 <div class="avatars">
-                    <div class="avatar"></div>
+                    <img src="https://i.pravatar.cc/100?u=4" class="avatar">
+                    <img src="https://i.pravatar.cc/100?u=5" class="avatar">
                 </div>
             </div>
         </div>
-        
-        </main>
+    </main>
 
     <div class="fab">
         <i class="fas fa-plus"></i>
     </div>
 
-    <script>
-        // Сюда вы позже добавите логику подключения к Supabase
-        console.log("Приложение готово к подключению Supabase");
-    </script>
 </body>
 </html>
