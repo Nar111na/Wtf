@@ -4,81 +4,79 @@
   <meta charset="UTF-8" />
   <title>Watch Party</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     body {
       margin: 0;
-      background: #0f0f0f;
-      color: white;
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    h1 {
-      margin-bottom: 20px;
-    }
-    input {
-      padding: 10px;
-      width: 260px;
-      border-radius: 8px;
-      border: none;
-      margin-right: 10px;
-    }
-    button {
-      padding: 10px 20px;
-      border: none;
-      background: #ff0055;
+      background: radial-gradient(circle at top, #0c1220, #05070d);
       color: white;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+    }
+
+    .logo {
+      font-weight: bold;
+      font-size: 18px;
+      color: #4ea3ff;
+    }
+
+    .login-btn {
+      background: #1a1a1a;
+      border: none;
+      color: white;
+      padding: 8px 16px;
       border-radius: 8px;
       cursor: pointer;
     }
-    .player {
-      margin-top: 20px;
-      width: 90%;
-      max-width: 800px;
-      aspect-ratio: 16/9;
+
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 60px 30px;
+      max-width: 600px;
     }
-    iframe {
-      width: 100%;
-      height: 100%;
+
+    .hero h1 {
+      font-size: 36px;
+      line-height: 1.2;
+      margin-bottom: 15px;
+    }
+
+    .hero p {
+      color: #aaa;
+      margin-bottom: 25px;
+    }
+
+    .cta-btn {
+      background: linear-gradient(90deg, #ff4db8, #6a7cff);
       border: none;
+      color: white;
+      padding: 14px 28px;
+      font-size: 16px;
       border-radius: 12px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <h1>Watch Party</h1>
+  <header>
+    <div class="logo">WPARTY</div>
+    <button class="login-btn">Войти</button>
+  </header>
 
-  <div>
-    <input id="videoUrl" placeholder="Вставь ссылку на YouTube" />
-    <button onclick="playVideo()">Смотреть</button>
-  </div>
-
-  <div class="player" id="player"></div>
-
-  <script>
-    function playVideo() {
-      let url = document.getElementById("videoUrl").value;
-
-      // извлекаем ID видео
-      let videoId = "";
-      if (url.includes("watch?v=")) {
-        videoId = url.split("watch?v=")[1];
-      } else if (url.includes("youtu.be/")) {
-        videoId = url.split("youtu.be/")[1];
-      }
-
-      if (videoId) {
-        document.getElementById("player").innerHTML =
-          `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-      } else {
-        alert("Вставь правильную ссылку на YouTube");
-      }
-    }
-  </script>
+  <section class="hero">
+    <h1>Смотрите видео с друзьями на расстоянии</h1>
+    <p>Без регистрации. Без скачивания.</p>
+    <button class="cta-btn">Смотреть вместе</button>
+  </section>
 
 </body>
 </html>
