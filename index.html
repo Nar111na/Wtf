@@ -7,85 +7,69 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* CSS ОТ CLAUDE + МОИ ПРАВКИ ДЛЯ СТАБИЛЬНОСТИ */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; background: #07030f; color: white; font-family: sans-serif; overflow-x: hidden; }
+    html, body { width: 100%; height: 100%; background: #07030f; color: white; font-family: sans-serif; overflow: hidden; }
 
-    .rave-bg { position: fixed; inset: 0; background: #07030f; overflow: hidden; z-index: -1; isolation: isolate; }
+    /* ФОН ОТ CLAUDE */
+    .rave-bg { position: fixed; inset: 0; z-index: -1; isolation: isolate; background: #07030f; }
     .blob { position: absolute; border-radius: 50%; filter: blur(80px); mix-blend-mode: screen; will-change: transform; opacity: 0.72; }
     
-    /* Твои блобы */
     .blob-1 { width: 65vmax; height: 65vmax; top: -15%; left: -10%; background: radial-gradient(circle at 40% 40%, #5b2d8e 0%, #2d1160 55%, transparent 80%); animation: drift-1 22s ease-in-out infinite alternate; }
-    .blob-2 { width: 55vmax; height: 55vmax; bottom: -20%; right: -10%; background: radial-gradient(circle at 55% 55%, #1a4fd6 0%, #0d2a8a 50%, transparent 80%); animation: drift-2 28s ease-in-out infinite alternate; }
-    .blob-3 { width: 45vmax; height: 45vmax; top: 30%; left: 30%; background: radial-gradient(circle at 50% 45%, #e0298e 0%, #8a1060 55%, transparent 80%); animation: drift-3 19s ease-in-out infinite alternate; }
-    .blob-4 { width: 38vmax; height: 38vmax; bottom: 5%; left: -5%; background: radial-gradient(circle at 50% 50%, #7c3ac9 0%, #3a1580 55%, transparent 80%); animation: drift-4 25s ease-in-out infinite alternate; }
-
-    /* Твои анимации drift */
+    .blob-2 { width: 55vmax; height: 55vmax; bottom: -20%; right: -10%; background: radial-gradient(circle at 5
     @keyframes drift-1 { 0% { transform: translate(0,0) scale(1); } 25% { transform: translate(8vw,6vh) scale(1.06); } 50% { transform: translate(14vw,-4vh) scale(0.94); } 75% { transform: translate(5vw,12vh) scale(1.1); } 100% { transform: translate(18vw,8vh) scale(1.02); } }
     @keyframes drift-2 { 0% { transform: translate(0,0) scale(1); } 33% { transform: translate(-10vw,5vh) scale(1.08); } 66% { transform: translate(-5vw,-10vh) scale(0.92); } 100% { transform: translate(-15vw,3vh) scale(1.05); } }
     @keyframes drift-3 { 0% { transform: translate(0,0) scale(1); } 20% { transform: translate(-8vw,8vh) scale(1.12); } 50% { transform: translate(6vw,-6vh) scale(0.88); } 80% { transform: translate(-4vw,10vh) scale(1.07); } 100% { transform: translate(10vw,-2vh) scale(0.96); } }
     @keyframes drift-4 { 0% { transform: translate(0,0) scale(1); } 40% { transform: translate(12vw,-8vh) scale(1.14); } 70% { transform: translate(6vw,5vh) scale(0.9); } 100% { transform: translate(16vw,-12vh) scale(1.05); } }
 
-    .rave-bg::before { content: ""; position: absolute; inset: 0; z-index: 1; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E"); background-size: 200px 200px; opacity: 0.045; mix-blend-mode: overlay; pointer-events: none; }
-    .rave-bg::after { content: ""; position: absolute; inset: 0; z-index: 2; background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, rgba(4,1,12,0.6) 100%); pointer-events: none; }
-
-    /* ИНТЕРФЕЙС ПРИЛОЖЕНИЯ */
-    .wrapper { position: relative; z-index: 10; padding-bottom: 100px; }
+    .wrapper { position: relative; z-index: 10; height: 100vh; overflow-y: auto; }
     header { display: flex; justify-content: space-between; align-items: center; padding: 20px; }
     .logo { font-size: 32px; font-weight: 900; letter-spacing: -2px; }
     .search-bar { background: rgba(255,255,255,0.1); backdrop-filter: blur(15px); border-radius: 15px; padding: 12px; margin: 0 15px 15px; display: flex; align-items: center; }
     .search-bar input { background: none; border: none; color: white; margin-left: 10px; width: 100%; outline: none; }
-    .section-title { padding: 10px 20px; font-size: 22px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
     .rooms-list { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
     .card { background: rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 20px; display: flex; height: 105px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-    .thumb { width: 150px; background: #000; position: relative; }
+    .thumb { width: 140px; background: #000; }
     .thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .info { padding: 12px; display: flex; flex-direction: column; justify-content: space-between; flex: 1; }
-    .add-btn { position: fixed; bottom: 30px; right: 25px; background: white; color: black; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .info { padding: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+    .add-btn { position: fixed; bottom: 30px; right: 25px; background: white; color: black; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   </style>
 </head>
 <body>
   <div class="rave-bg">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-    <div class="blob blob-4"></div>
+    <div class="blob blob-1"></div><div class="blob blob-2"></div>
+    <div class="blob blob-3"></div><div class="blob blob-4"></div>
   </div>
 
   <div class="wrapper">
     <header><i class="fas fa-cog"></i><div class="logo">rave</div><i class="fas fa-user-friends"></i></header>
     <div class="search-bar"><i class="fas fa-search"></i><input type="text" placeholder="Поиск"></div>
-    <div class="section-title"><i class="fas fa-globe"></i> Публичные</div>
-    <div id="rooms-container" class="rooms-list"></div>
+    <div style="padding: 10px 20px; font-size: 20px; font-weight: bold;">Публичные</div>
+    <div id="rooms" class="rooms-list"></div>
   </div>
 
-  <div class="add-btn" onclick="addRoom()"><i class="fas fa-plus"></i></div>
+  <div class="add-btn" onclick="add()"><i class="fas fa-plus"></i></div>
 
   <script>
     const S_URL = 'https://otkessnonmdttowgkfrg.supabase.co';
     const S_KEY = 'Sb_publishable_J3AE0I_VFL0dvf3ffO7vbg_bwHJSWux';
-    const _supabase = supabase.createClient(S_URL, S_KEY);
+    const sb = supabase.createClient(S_URL, S_KEY);
 
     async function load() {
-      const { data } = await _supabase.from('rooms').select('*').gt('participants_count', 0).order('created_at', { ascending: false });
-      const container = document.getElementById('rooms-container');
-      container.innerHTML = data ? data.map(r => `
+      const { data } = await sb.from('rooms').select('*').gt('participants_count', 0).order('created_at', { ascending: false });
+      document.getElementById('rooms').innerHTML = data ? data.map(r => `
         <div class="card">
           <div class="thumb"><img src="https://picsum.photos/seed/${r.id}/200/120"></div>
-          <div class="info">
-            <div style="font-weight:600; font-size:14px;">${r.title}</div>
-            <div style="font-size:12px; opacity:0.6;">${r.participants_count} участников</div>
-          </div>
-        </div>`).join('') : '<p style="text-align:center;opacity:0.5;">Нет комнат</p>';
+          <div class="info"><b>${r.title}</b><p style="font-size:12px;opacity:0.6">${r.participants_count} участников</p></div>
+        </div>`).join('') : '';
     }
 
-    async function addRoom() {
-      const n = prompt("Название комнаты:");
-      if (n) { await _supabase.from('rooms').insert([{ title: n, participants_count: 1 }]); load(); }
+    async function add() {
+      const n = prompt("Название рейва:");
+      if (n) { await sb.from('rooms').insert([{ title: n, participants_count: 1 }]); load(); }
     }
 
     load();
-    _supabase.channel('any').on('postgres_changes', {event:'*', schema:'public', table:'rooms'}, load).subscribe();
+    sb.channel('any').on('postgres_changes', {event:'*', schema:'public', table:'rooms'}, load).subscribe();
   </script>
 </body>
 </html>
